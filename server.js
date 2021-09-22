@@ -24,35 +24,26 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
-app.get("/api/:date", function (req, res) {
-  const {date} = req.params;
-  let parsed_if_utc = new Date(date);
-  let parsed_if_unix = new Date(date/1000);
+app.get("/api/:dateString?", function (req, res) {
+  let {dateString} = req.params;
+  let date;
 
-  console.log(parsed_if_utc, Object.prototype.toString.call(parsed_if_utc));
-  console.log(parsed_if_unix, Object.prototype.toString.call(parsed_if_unix));
-  
-  let parsed = null;
-  if(parsed_if_utc.toString() !== 'Invalid Date'){
-    parsed = parsed_if_utc;
-  } else if(parsed_if_unix.toString() !== 'Invalid Date'){
-    parsed = parsed_if_unix;
+  if(!dateString){
+    date = new Date();
   } else{
-    return res.json({ error : "Invalid Date" });
+    if(!isNaN(dateString)){
+      date = new Date(parseInt(dateString));
+    } else{
+      date = new Date(dateString);
+    }
   }
-  return res.json({
-    unix: parsed.getTime() / 1000,
-    utc: parsed.toUTCString()
-  })
+
+  if(date.toString() === 'Invalid Date')
+    res.json({error: 'Invalid Date'});
+  else
+    res.json({unix: date.getTime(), utc: date.toUTCString()})
 });
 
-app.get("/api", function (req, res) {
-  const cur_date = new Date();
-  return res.json({
-    unix: cur_date.getTime(),
-    utc: cur_date.toUTCString()
-  })
-});
 
 
 // listen for requests :)
